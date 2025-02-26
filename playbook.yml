@@ -1,0 +1,50 @@
+- hosts: all
+  become: yes
+  tasks:
+    # Update apt cache
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    # Install Docker
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    # Start and enable Docker service
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    # Add user to Docker group
+    - name: Add user to Docker group
+      user:
+        name: azureuser
+        groups: docker
+        append: yes
+
+    # Copy the Dockerfile and application code to the VM
+    - name: Copy Dockerfile and application code
+      copy:
+        src: ./hello-world-app/  # Directory containing your Dockerfile and app code
+        dest: /home/azureuser/hello-world-app/
+
+    # Build the Docker image
+    - name: Build Docker image
+      docker_image:
+        name: hello-world-app
+        build:
+          path: /home/azureuser/hello-world-app/
+        source: build
+
+    # Run the Docker container
+    - name: Run Docker container
+      docker_container:
+        name: hello-world-app
+        image: hello-world-app
+        state: started
+        ports:
+          - "80:80"  # Expose port 80 on the VM
