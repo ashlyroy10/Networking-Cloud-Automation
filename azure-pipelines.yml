@@ -1,0 +1,20 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - script: |
+      terraform init
+      terraform apply -auto-approve
+    displayName: 'Deploy Infrastructure'
+
+  - script: |
+      ansible-playbook -i 4.246.200.249, playbook.yml -u azureuser --extra-vars "ansible_ssh_pass=Password1234!"
+    displayName: 'Configure Server'
+
+  - script: |
+      docker build -t myapp .
+      docker run -d -p 80:80 myapp
+    displayName: 'Deploy Docker Container'
