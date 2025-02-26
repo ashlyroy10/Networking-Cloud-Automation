@@ -1,20 +1,32 @@
 trigger:
-  - main
+  - main  # Trigger pipeline on changes to the main branch
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-latest'  # Use Ubuntu as the build agent
+
+variables:
+  AZURE_VM_IP: '4.246.200.249'  # Replace with your Azure VM's public IP
+  AZURE_VM_USER: 'azureuser'     # SSH user for the Azure VM
+  AZURE_VM_PASSWORD: 'Password1234!'  # SSH password for the Azure VM (set as a secret variable)
 
 steps:
+  # Step 1: Deploy Infrastructure using Terraform
   - script: |
+      echo "Deploying infrastructure using Terraform..."
       terraform init
       terraform apply -auto-approve
     displayName: 'Deploy Infrastructure'
 
+  # Step 2: Configure Server using Ansible
   - script: |
+      echo "Configuring server using Ansible..."
       ansible-playbook -i 4.246.200.249, playbook.yml -u azureuser --extra-vars "ansible_ssh_pass=Password1234!"
     displayName: 'Configure Server'
-
+  # Step 3: Build and Deploy Docker Container
   - script: |
-      docker build -t myapp .
-      docker run -d -p 80:80 myapp
+      echo "Building and deploying Docker container..."
+      sshpass -p "Password1234!" ssh azureuser@4.246.200.249 "cd /home/azureuser/hello-world-app && docker build -t myapp ."
+      sshpass -p "Password1234!" ssh azureuser@4.246.200.249 "docker stop myapp || true"
+      sshpass -p "Password1234!" ssh azureuser@4.246.200.249 "docker rm myapp || true"
+      sshpass -p "Password1234!" ssh azureuser@4.246.200.249 "docker run -d -p 80:80 myapp"
     displayName: 'Deploy Docker Container'
