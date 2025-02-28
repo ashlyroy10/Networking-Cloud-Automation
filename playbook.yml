@@ -4,6 +4,11 @@
     ansible_python_interpreter: /usr/bin/python3.8
 
   pre_tasks:
+    - name: "Install python3-apt"
+      apt:
+        name: python3-apt
+        state: present
+
     - name: "Install Essential Python Dependencies"
       raw: |
         sudo apt-get update -qq
