@@ -1,11 +1,12 @@
+name: Deploy Application
 on:
   push:
     branches:
-      - main  # Trigger pipeline on changes to the main branch
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Use Ubuntu as the build agent
+    runs-on: ubuntu-latest
 
     steps:
       # Step 1: Checkout the code
@@ -18,20 +19,22 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # Step 3: Add the target server's host key to known_hosts
+      # Step 3: Add target server to known_hosts
       - name: Add server to known_hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan 4.246.200.249 >> ~/.ssh/known_hosts
 
-      # Step 4: Install Ansible and dependencies
+      # Step 4: Install Ansible with Python 3.6 compatibility
       - name: Install Ansible and dependencies
         run: |
           sudo apt-get update
-          sudo apt install -y sshpass ansible
+          sudo apt install -y sshpass python3-pip
+          sudo python3 -m pip install "ansible-core<2.12"  # Last version supporting Python 3.6
 
-      # Step 5: Configure Server and Deploy using Ansible
-      - name: Configure Server and Deploy
+      # Step 5: Run Ansible playbook
+      - name: Execute Ansible Playbook
         run: |
-          echo "Configuring server and deploying application using Ansible..."
-          ansible-playbook -i 4.246.200.249, playbook.yml -u azureuser
+          echo "🚀 Starting deployment to production..."
+          ansible-playbook -i 4.246.200.249, playbook.yml -u azureuser --ssh-common-args='-o StrictHostKeyChecking=no'
+          echo "✅ Successfully deployed application!"
