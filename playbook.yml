@@ -26,10 +26,10 @@
         groups: docker
         append: yes
 
-    # Copy the Dockerfile and application code to the VM
-    - name: Copy Dockerfile and application code
+    # Copy the hello-world-app directory to the target machine
+    - name: Copy hello-world-app directory
       copy:
-        src: ./hello-world-app/  # Directory containing your Dockerfile and app code
+        src: ./hello-world-app/  # Source directory (checked out by GitHub Actions)
         dest: /home/azureuser/hello-world-app/
 
     # Build the Docker image
@@ -37,7 +37,7 @@
       docker_image:
         name: hello-world-app
         build:
-          path: /home/azureuser/hello-world-app/
+          path: /home/azureuser/hello-world-app/  # Path to the copied directory
         source: build
 
     # Run the Docker container
