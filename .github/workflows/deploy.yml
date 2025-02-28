@@ -1,0 +1,25 @@
+on:
+  push:
+    branches:
+      - main  # Trigger pipeline on changes to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # Use Ubuntu as the build agent
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Install Ansible and dependencies
+      - name: Install Ansible and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt install -y sshpass ansible
+
+      # Step 3: Configure Server and Deploy using Ansible
+      - name: Configure Server and Deploy
+        run: |
+          echo "Configuring server and deploying application using Ansible..."
+          ansible-playbook -i 4.246.200.249, playbook.yml -u azureuser --extra-vars "ansible_ssh_pass=Password1234!"
