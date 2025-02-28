@@ -18,13 +18,19 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # Step 3: Install Ansible and dependencies
+      # Step 3: Add the target server's host key to known_hosts
+      - name: Add server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan 4.246.200.249 >> ~/.ssh/known_hosts
+
+      # Step 4: Install Ansible and dependencies
       - name: Install Ansible and dependencies
         run: |
           sudo apt-get update
           sudo apt install -y sshpass ansible
 
-      # Step 4: Configure Server and Deploy using Ansible
+      # Step 5: Configure Server and Deploy using Ansible
       - name: Configure Server and Deploy
         run: |
           echo "Configuring server and deploying application using Ansible..."
