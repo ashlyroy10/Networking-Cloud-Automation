@@ -1,7 +1,7 @@
 - hosts: all
   become: yes
   vars:
-    ansible_python_interpreter: /usr/bin/python3.7
+    ansible_python_interpreter: /usr/bin/python3.8
 
   pre_tasks:
     - name: "Install Essential Python Dependencies"
