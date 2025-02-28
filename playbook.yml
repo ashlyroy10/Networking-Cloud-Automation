@@ -1,5 +1,14 @@
 - hosts: all
   become: yes
+  # Pre-tasks to handle Python 3 installation
+  pre_tasks:
+    - name: Install Python 3 if not present
+      raw: test -e /usr/bin/python3 || (apt-get update && apt-get install -y python3)
+      changed_when: false
+
+    - name: Set Ansible Python Interpreter
+      set_fact:
+        ansible_python_interpreter: /usr/bin/python3
   tasks:
     # Update apt cache
     - name: Update apt cache
