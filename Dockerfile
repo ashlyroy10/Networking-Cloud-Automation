@@ -27,6 +27,12 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python3.8 get-pip.py && \
     rm get-pip.py
 
+# Add the target VM's SSH host key to known_hosts
+RUN mkdir -p /root/.ssh && \
+    chmod 700 /root/.ssh && \
+    ssh-keyscan 40.88.13.22 >> /root/.ssh/known_hosts && \
+    chmod 600 /root/.ssh/known_hosts
+
 # Copy your Ansible playbook and inventory files into the container
 COPY . /app
 WORKDIR /app
