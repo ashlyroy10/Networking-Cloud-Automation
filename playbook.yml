@@ -24,7 +24,7 @@
       raw: |
         /usr/bin/python3.8 -c "import apt; print(apt.__file__)"
       register: apt_check
-      failed_when: "apt_check.rc != 0
+      failed_when: "apt_check.rc != 0"
 
     - name: "Install Essential Python Dependencies"
       raw: |
