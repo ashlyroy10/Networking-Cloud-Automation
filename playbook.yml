@@ -4,20 +4,25 @@
     ansible_python_interpreter: /usr/bin/python3.8
 
   pre_tasks:
-    - name: "Manually link apt_pkg for Python 3.8"
-      raw: |
-        sudo ln -sf /usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so /usr/lib/python3.8/lib-dynload/apt_pkg.so
-      args:
-        warn: false
+    - name: "Set up Python 3.8"
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: "Install python3-apt"
+      run: |
+        sudo apt update
+        sudo apt-get install -y python3-apt
+      changed_when: false
 
     - name: "Verify apt module"
-      raw: |
+      apt: |
         /usr/bin/python3.8 -c "import apt; print(apt.__file__)"
       register: apt_check
       failed_when: "apt_check.rc != 0"
 
     - name: "Install Essential Python Dependencies"
-      raw: |
+      apt: |
         sudo apt-get update -qq
         sudo apt-get install -y python3-distutils python3-apt python3-dev
       changed_when: false
