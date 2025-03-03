@@ -27,16 +27,10 @@ jobs:
           ssh-keyscan 40.88.13.22 >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-      # Step 4: Install Ansible and dependencies
-      - name: Install Ansible and dependencies
-        run: |
-          sudo apt-get update
-          sudo apt install -y sshpass python3-pip
-          sudo python3 -m pip install "ansible-core<2.12"  # Last version supporting Python 3.6
-
-      # Step 5: Run Ansible playbook
-      - name: Execute Ansible Playbook
+      # Step 4: Build and run the Docker container
+      - name: Build and run Docker container
         run: |
           echo "🚀 Starting deployment to production..."
-          ansible-playbook -i inventory.yml playbook.yml -u azureuser --ssh-common-args='-o StrictHostKeyChecking=no'
+          docker build -t ansible-python3.8 .
+          docker run -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK -v $SSH_AUTH_SOCK:$SSH_AUTH_SOCK ansible-python3.8
           echo "✅ Successfully deployed application!"
