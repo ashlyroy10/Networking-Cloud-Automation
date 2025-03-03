@@ -38,7 +38,7 @@ COPY . /app
 WORKDIR /app
 
 # Copy the SSH private key
-COPY id_rsa /root/.ssh/id_rsa_server
+COPY id_rsa_server /root/.ssh/id_rsa_server
 RUN chmod 600 /root/.ssh/id_rsa_server
 
 # Run the Ansible playbook
