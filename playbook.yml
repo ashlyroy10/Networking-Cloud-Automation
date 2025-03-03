@@ -4,9 +4,6 @@
     ansible_python_interpreter: /usr/bin/python3.8
 
   pre_tasks:
-    - name: "Update apt cache"
-      apt:
-        update_cache: yes
     
     - name: "Install python3-apt"
       apt:
@@ -41,6 +38,9 @@
       failed_when: "ssl_check.rc != 0"
 
   tasks:
+    - name: "Update apt cache"
+      apt:
+        update_cache: yes
     # Install Docker
     - name: Install Docker
       apt:
