@@ -15,6 +15,7 @@ RUN apt update && apt install -y \
     git \
     sshpass \
     docker.io \
+    curl \  # Install curl
     && rm -rf /var/lib/apt/lists/*
 
 # Set Python 3.8 as the default Python version
