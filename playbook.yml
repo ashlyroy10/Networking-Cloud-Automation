@@ -5,12 +5,6 @@
 
   pre_tasks:
     
-    - name: "Install python3-apt"
-      apt:
-        name: python3-apt
-        state: present
-
-    
     - name: "Manually link apt_pkg for Python 3.8"
       raw: |
         sudo ln -sf /usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so /usr/lib/python3.8/lib-dynload/apt_pkg.so
