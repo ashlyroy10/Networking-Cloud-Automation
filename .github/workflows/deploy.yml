@@ -38,5 +38,5 @@ jobs:
       - name: Execute Ansible Playbook
         run: |
           echo "🚀 Starting deployment to production..."
-          ansible-playbook -i 20.169.232.81, playbook.yml -u azureuser --ssh-common-args='-o StrictHostKeyChecking=no'
+          ansible-playbook -i inventory.yml, playbook.yml -u azureuser --ssh-common-args='-o StrictHostKeyChecking=no'
           echo "✅ Successfully deployed application!"

@@ -4,7 +4,6 @@
     ansible_python_interpreter: /usr/bin/python3.8
 
   pre_tasks:
-    
     - name: "Manually link apt_pkg for Python 3.8"
       raw: |
         sudo ln -sf /usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so /usr/lib/python3.8/lib-dynload/apt_pkg.so
