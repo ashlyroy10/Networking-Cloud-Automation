@@ -41,11 +41,6 @@
       failed_when: "ssl_check.rc != 0"
 
   tasks:
-    # Update apt cache
-    - name: Update apt cache
-      apt:
-        update_cache: yes
-
     # Install Docker
     - name: Install Docker
       apt:
