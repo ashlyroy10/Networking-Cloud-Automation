@@ -27,10 +27,27 @@ jobs:
           ssh-keyscan 40.88.13.22 >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-     # Step 4: Build and run the Docker container
+      # Step 4: Verify Docker installation
+      - name: Verify Docker installation
+        run: |
+          docker --version
+
+      # Step 5: Build and run the Docker container
       - name: Build and run Docker container
         run: |
           echo "🚀 Starting deployment to production..."
-          docker build --build-arg SSH_PRIVATE_KEY="$(echo ${{ secrets.SSH_PRIVATE_KEY }} | base64 -d)" -t ansible-python3.8 .
+          docker build --build-arg SSH_PRIVATE_KEY="${{ secrets.SSH_PRIVATE_KEY }}" -t ansible-python3.8 .
           docker run ansible-python3.8
           echo "✅ Successfully deployed application!"
+
+      # Step 6: Print Docker logs if the container fails
+      - name: Print Docker logs if the container fails
+        if: ${{ failure() }}
+        run: |
+          docker logs $(docker ps -aqf "ancestor=ansible-python3.8")
+
+      # Step 7: Clean up Docker resources
+      - name: Clean up Docker resources
+        if: ${{ always() }}
+        run: |
+          docker system prune -f

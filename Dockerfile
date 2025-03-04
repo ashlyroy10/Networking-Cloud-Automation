@@ -16,16 +16,18 @@ RUN apt update && \
         git \
         sshpass \
         docker.io \
-        curl && \
-    rm -rf /var/lib/apt/lists/*
+        curl \
+        python3-pip && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Set Python 3.8 as the default Python version
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
 
-# Install pip for Python 3.8
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-    python3.8 get-pip.py && \
-    rm get-pip.py
+# Install required Python modules
+RUN pip3 install docker
+
+# Install community.docker collection
+RUN ansible-galaxy collection install community.docker
 
 # Add the target VM's SSH host key to known_hosts
 RUN mkdir -p /root/.ssh && \
@@ -39,8 +41,8 @@ WORKDIR /app
 
 # Copy the SSH private key
 ARG SSH_PRIVATE_KEY
-RUN echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa_server && \
-    chmod 600 /root/.ssh/id_rsa_server
+RUN echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa && \
+    chmod 600 /root/.ssh/id_rsa
 
 # Run the Ansible playbook
 CMD ["ansible-playbook", "-i", "inventory.yml", "playbook.yml"]

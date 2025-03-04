@@ -1,11 +1,12 @@
 - hosts: all
   become: yes
+  remote_user: azureuser
   vars:
     ansible_python_interpreter: /usr/bin/python3.8
 
   pre_tasks:
     - name: "Install python3-apt"
-      raw: |
+      ansible.builtin.raw: |
         sudo apt-get update -qq
         sudo apt-get install -y python3-apt
       changed_when: false
@@ -13,7 +14,7 @@
         warn: false
 
     - name: "Install Essential Python Dependencies"
-      raw: |
+      ansible.builtin.raw: |
         sudo apt-get update -qq
         sudo apt-get install -y python3-distutils python3-apt python3-dev
       changed_when: false
@@ -21,56 +22,65 @@
         warn: false
 
     - name: "Verify Python SSL Module"
-      raw: |
+      ansible.builtin.raw: |
         python3 -c "import ssl; print(ssl.OPENSSL_VERSION)"
       register: ssl_check
       failed_when: "ssl_check.rc != 0"
 
   tasks:
-    # Update apt cache
+    - name: Install community.docker collection
+      ansible.builtin.command:
+        cmd: ansible-galaxy collection install community.docker
+
     - name: Update apt cache
-      apt:
+      ansible.builtin.apt:
         update_cache: yes
 
-    # Install Docker
     - name: Install Docker
-      apt:
+      ansible.builtin.apt:
         name: docker.io
         state: present
 
-    # Start and enable Docker service
     - name: Start and enable Docker service
-      service:
+      ansible.builtin.service:
         name: docker
         state: started
         enabled: yes
 
-    # Add user to Docker group
+    - name: Verify Docker installation
+      ansible.builtin.command:
+        cmd: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Debug Docker version
+      ansible.builtin.debug:
+        var: docker_version.stdout
+
     - name: Add user to Docker group
-      user:
+      ansible.builtin.user:
         name: azureuser
         groups: docker
         append: yes
 
-    # Copy the hello-world-app directory to the target machine
     - name: Copy hello-world-app directory
-      copy:
-        src: ./hello-world-app/  # Source directory (checked out by GitHub Actions)
+      ansible.builtin.copy:
+        src: ./hello-world-app/
         dest: /home/azureuser/hello-world-app/
 
-    # Build the Docker image
     - name: Build Docker image
-      docker_image:
+      community.docker.docker_image:
         name: hello-world-app
         build:
-          path: /home/azureuser/hello-world-app/  # Path to the copied directory
+          path: /home/azureuser/hello-world-app/
         source: build
+      ignore_errors: no
 
-    # Run the Docker container
     - name: Run Docker container
-      docker_container:
+      community.docker.docker_container:
         name: hello-world-app
         image: hello-world-app
         state: started
         ports:
-          - "80:80"  # Expose port 80 on the VM
+          - "80:80"
+      ignore_errors: no
