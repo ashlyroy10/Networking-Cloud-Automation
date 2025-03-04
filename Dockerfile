@@ -38,8 +38,9 @@ COPY . /app
 WORKDIR /app
 
 # Copy the SSH private key
-COPY id_rsa_server /root/.ssh/id_rsa_server
-RUN chmod 600 /root/.ssh/id_rsa_server
+ARG SSH_PRIVATE_KEY
+RUN echo "$SSH_PRIVATE_KEY" > /root/.ssh/id_rsa_server && \
+    chmod 600 /root/.ssh/id_rsa_server
 
 # Run the Ansible playbook
 CMD ["ansible-playbook", "-i", "inventory.yml", "playbook.yml"]

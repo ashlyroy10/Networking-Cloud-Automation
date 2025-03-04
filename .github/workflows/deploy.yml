@@ -31,6 +31,6 @@ jobs:
       - name: Build and run Docker container
         run: |
           echo "🚀 Starting deployment to production..."
-          docker build -t ansible-python3.8 .
-          docker run -e SSH_AUTH_SOCK=$SSH_AUTH_SOCK -v $SSH_AUTH_SOCK:$SSH_AUTH_SOCK ansible-python3.8
+          docker build --build-arg SSH_PRIVATE_KEY="${{ secrets.SSH_PRIVATE_KEY }}" -t ansible-python3.8 .
+          docker run ansible-python3.8
           echo "✅ Successfully deployed application!"
