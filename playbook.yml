@@ -27,9 +27,6 @@
         sudo apt-get update -qq
         sudo apt-get install -y ansible
 
-    - name: Install community.docker collection
-      command: ansible-galaxy collection install community.docker
-
     - name: Update apt cache
       apt:
         update_cache: yes
