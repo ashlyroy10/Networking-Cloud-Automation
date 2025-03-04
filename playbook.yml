@@ -6,66 +6,62 @@
 
   pre_tasks:
     - name: "Install python3-apt"
-      ansible.builtin.shell: |
+      raw: |
         sudo apt-get update -qq
         sudo apt-get install -y python3-apt
-      changed_when: false
 
     - name: "Install Essential Python Dependencies"
-      ansible.builtin.shell: |
+      raw: |
         sudo apt-get update -qq
         sudo apt-get install -y python3-distutils python3-apt python3-dev
-      changed_when: false
 
     - name: "Verify Python SSL Module"
-      ansible.builtin.shell: |
+      raw: |
         python3 -c "import ssl; print(ssl.OPENSSL_VERSION)"
       register: ssl_check
       failed_when: "ssl_check.rc != 0"
 
   tasks:
     - name: Install community.docker collection
-      ansible.builtin.command:
-        cmd: ansible-galaxy collection install community.docker
+      command: ansible-galaxy collection install community.docker
 
     - name: Update apt cache
-      ansible.builtin.apt:
+      apt:
         update_cache: yes
 
     - name: Install Docker
-      ansible.builtin.apt:
+      apt:
         name: docker.io
         state: present
 
     - name: Start and enable Docker service
-      ansible.builtin.service:
+      service:
         name: docker
         state: started
         enabled: yes
 
     - name: Verify Docker installation
-      ansible.builtin.command:
-        cmd: docker --version
+      command: docker --version
       register: docker_version
       changed_when: false
 
     - name: Debug Docker version
-      ansible.builtin.debug:
+      debug:
         var: docker_version.stdout
 
     - name: Add user to Docker group
-      ansible.builtin.user:
+      user:
         name: azureuser
         groups: docker
         append: yes
 
     - name: Copy hello-world-app directory
-      ansible.builtin.copy:
+      copy:
         src: ./hello-world-app/
         dest: /home/azureuser/hello-world-app/
 
     - name: Build Docker image
-      community.docker.docker_image:
+      docker_image:
         name: hello-world-app
         build:
           path: /home/azureuser/hello-world-app/
@@ -73,7 +69,7 @@
       ignore_errors: no
 
     - name: Run Docker container
-      community.docker.docker_container:
+      docker_container:
         name: hello-world-app
         image: hello-world-app
         state: started
