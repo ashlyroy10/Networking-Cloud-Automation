@@ -68,7 +68,7 @@
 
     - name: Copy application files (Dockerfile + index.html) to server
       copy:
-        src: ./ 
+        src: ./hello-world-app/ 
         dest: /home/azureuser/hello-world-app/
         owner: azureuser
         group: azureuser
