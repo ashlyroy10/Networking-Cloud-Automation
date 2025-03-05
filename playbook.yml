@@ -1,84 +1,89 @@
 - hosts: all
   become: yes
-  remote_user: azureuser
-  vars:
-    ansible_python_interpreter: /usr/bin/python3.8
-
-  pre_tasks:
-    - name: "Install python3-apt"
-      raw: |
-        sudo apt-get update -qq
-        sudo apt-get install -y python3-apt
-
-    - name: "Install Essential Python Dependencies"
-      raw: |
-        sudo apt-get update -qq
-        sudo apt-get install -y python3-distutils python3-apt python3-dev
-
-    - name: "Verify Python SSL Module"
-      raw: |
-        python3 -c "import ssl; print(ssl.OPENSSL_VERSION)"
-      register: ssl_check
-      failed_when: "ssl_check.rc != 0"
-
   tasks:
-    - name: Install Ansible
-      raw: |
-        sudo apt-get update -qq
-        sudo apt-get install -y ansible
 
-    - name: Reinstall python3-apt
-      raw: |
-        sudo apt-get install --reinstall -y python3-apt
-
-    - name: Update apt cache
+    - name: Install required packages
       apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+          - python3-pip
+        state: present
         update_cache: yes
 
-    - name: Install Docker
-      apt:
-        name: docker.io
-        state: present
+    - name: Check if Docker GPG key exists
+      stat:
+        path: /etc/apt/keyrings/docker.gpg
+      register: docker_gpg_stat
 
-    - name: Start and enable Docker service
-      service:
+    - name: Add Docker GPG key (if missing)
+      shell: |
+        install -m 0755 -d /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        chmod a+r /etc/apt/keyrings/docker.gpg
+      when: not docker_gpg_stat.stat.exists
+
+    - name: Add Docker repository
+      shell: |
+        echo \
+        "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" | \
+        tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    - name: Install Docker CE and tools
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is started
+      systemd:
         name: docker
         state: started
         enabled: yes
 
-    - name: Verify Docker installation
-      command: docker --version
-      register: docker_version
-      changed_when: false
-
-    - name: Debug Docker version
-      debug:
-        var: docker_version.stdout
-
-    - name: Add user to Docker group
+    - name: Add azureuser to Docker group
       user:
         name: azureuser
         groups: docker
         append: yes
 
-    - name: Copy hello-world-app directory
+    - name: Install Python Docker SDK (needed for community.docker)
+      pip:
+        name: docker
+      become: yes
+
+    - name: Create directory for app files
+      file:
+        path: /home/azureuser/hello-world-app/
+        state: directory
+        owner: azureuser
+        group: azureuser
+        mode: '0755'
+
+    - name: Copy application files (Dockerfile + index.html) to server
       copy:
-        src: ./hello-world-app/
+        src: ./ 
         dest: /home/azureuser/hello-world-app/
+        owner: azureuser
+        group: azureuser
 
-    - name: Build Docker image
-      docker_image:
-        name: hello-world-app
-        build:
-          path: /home/azureuser/hello-world-app/
-        source: build
-      ignore_errors: no
 
-    - name: Run Docker container
-      docker_container:
-        name: hello-world-app
-        image: hello-world-app
-        state: started
-        ports:
-          - "80:80"
-      ignore_errors: no
+    - name: Remove old container if exists
+      command: docker rm -f hello-world-app
+      ignore_errors: yes
+      
+    - name: Build Docker image (force latest rebuild)
+      command: docker build -t hello-world-app:latest /home/azureuser/hello-world-app/
+      become: yes
+
+    - name: Run new Docker container
+      command: >
+        docker run -d --name hello-world-app -p 80:80
+        hello-world-app:latest
+      become: yes

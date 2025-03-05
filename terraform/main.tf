@@ -5,7 +5,7 @@ subscription_id = "a076aa24-b36b-4b30-94e6-bc67fdf1e89e"
 
 resource "azurerm_resource_group" "rg" {
   name     = "myResourceGroup"
-  location = "East US"
+  location = "East US 2"
 }
 
 resource "azurerm_virtual_network" "vnet" {
@@ -20,14 +20,16 @@ resource "azurerm_subnet" "subnet" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]
+  depends_on = [azurerm_virtual_network.vnet]
 }
 
 resource "azurerm_public_ip" "publicip" {
   name                = "myPublicIP"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic"
-  sku                 = "Basic"
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  zones               = ["2"]
 }
 
 resource "azurerm_network_interface" "nic" {
@@ -51,14 +53,14 @@ resource "azurerm_virtual_machine" "vm" {
   vm_size               = "Standard_DS1_v2"
 
   storage_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "18.04-LTS"
-    version   = "latest"
+    publisher    = "canonical"
+    offer        = "0001-com-ubuntu-server-jammy"
+    sku          = "22_04-lts-gen2"
+    version      = "latest"
   }
 
   storage_os_disk {
-    name              = "myOsDisk"
+    name              = "myNewOsDisk"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
