@@ -53,10 +53,10 @@
         groups: docker
         append: yes
 
-    - name: Install Python Docker SDK (needed for community.docker)
-      pip:
-        name: docker
-      become: yes
+    # - name: Install Python Docker SDK (needed for community.docker)
+    #   pip:
+    #     name: docker
+    #   become: yes
 
     - name: Create directory for app files
       file:
