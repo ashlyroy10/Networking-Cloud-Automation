@@ -20,10 +20,10 @@ jobs:
 
       - name: Deploy using Ansible
         env:
-          VM_IP: 52.179.249.254  # Replace with your Azure VM Public IP
-          VM_USER: azureuser
-          VM_PASSWORD: Password1234!  # Add this to GitHub Secrets
+          VM_IP: ${{ secrets.VM_IP_ADDRESS }}  # Replace with your Azure VM Public IP
+          VM_USER: ${{ secrets.VM_USERNAME }}
+          VM_PASSWORD: ${{ secrets.VM_PASSWORD }}  # Add this to GitHub Secrets
         run: |
-          ansible-playbook -i "52.179.249.254," playbook.yml -u "azureuser" \
+          ansible-playbook -i "${{secrets.VM_IP_ADDRESS}}," playbook.yml -u "azureuser" \
             --extra-vars "ansible_ssh_pass=Password1234!" \
             -e 'ansible_ssh_common_args="-o StrictHostKeyChecking=no"' 
