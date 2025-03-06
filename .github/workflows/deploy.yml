@@ -25,5 +25,5 @@ jobs:
           VM_PASSWORD: ${{ secrets.VM_PASSWORD }}  # Add this to GitHub Secrets
         run: |
           ansible-playbook -i "${{secrets.VM_IP_ADDRESS}}," playbook.yml -u "azureuser" \
-            --extra-vars "ansible_ssh_pass=Password1234!" \
+            --extra-vars "ansible_ssh_pass=${{ secrets.VM_PASSWORD }}" \
             -e 'ansible_ssh_common_args="-o StrictHostKeyChecking=no"' 
