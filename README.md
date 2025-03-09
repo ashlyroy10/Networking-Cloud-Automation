@@ -2,8 +2,8 @@
 
 This project automates the deployment of a Dockerized web application on an Azure Virtual Machine using Terraform for infrastructure provisioning, Ansible for configuration management, Docker for containerization, and GitHub Actions for CI/CD pipeline integration.
 
-**Prerequisites:**
-Before running the project, ensure you have the following:
+**Prerequisites:**\\
+Before running the project, ensure you have the following:\\
 - Azure Account with an active subscription
 - Terraform installed (v1.5+) → Install Guide
 - Ansible installed (v2.9+) → sudo apt install ansible
